@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 require('dotenv').config();
 const app = express();
@@ -29,12 +29,35 @@ async function run() {
 
     const usersCollection = client.db('usersDB').collection('users');
 
+    app.get('/users', async (req, res) => {
+      const cursor = usersCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     // add users to DB
     app.post('/users', async (req, res) => {
       const newUser = req.body;
       console.log(newUser);
 
       const result = await usersCollection.insertOne(newUser);
+      res.send(result);
+    });
+
+    // update
+    app.get('/users/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.findOne(query);
+      res.send(result);
+    });
+
+    // Delete
+    app.delete('/users/:id', async (req, res) => {
+      const id = req.params.id;
+      //   console.log('please delete from id', id);
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.deleteOne(query);
       res.send(result);
     });
 
